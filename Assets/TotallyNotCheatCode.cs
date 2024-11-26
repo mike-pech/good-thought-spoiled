@@ -33,7 +33,7 @@ public class TotallyNotCheatCode : MonoBehaviour
             if (currentKeyIndex >= konamiCode.Length)
             {
                 Stop();
-                transform.position = finish.transform.position + new Vector3(0, 0, 1);
+                transform.position = finish.transform.position + new Vector3(0, 1, 0);
                 currentKeyIndex = 0;
             }
         }

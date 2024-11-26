@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
@@ -9,7 +10,7 @@ public class BallHandler : MonoBehaviour
     [SerializeField] private LineRenderer lineRenderer;
     [SerializeField] private float stopVelocity = 0.05f;
     [SerializeField] private float shotPower = 150f;
-
+    [SerializeField] private float reflectPower = 150f;
     private bool isIdle;
     private bool isAiming;
 
@@ -39,13 +40,23 @@ public class BallHandler : MonoBehaviour
 
     public void Stop()
     {
-        rigidbody.velocity = Vector3.zero;
+        rigidbody.velocity = new Vector3(
+            0,
+            rigidbody.velocity.y,
+            0
+            );
         rigidbody.angularVelocity = Vector3.zero;
+        transform.rotation = new Quaternion(0, 0, 0, 0);
         isIdle = true;
     }
 
     private void OnMouseDown()
     {
+        // DEBUG ONLY — DELETE WHEN FINISHED!
+        if (!isAiming || !isIdle)
+        {
+            Stop();
+        }
         if (isIdle)
         {
             isAiming = true;
@@ -76,6 +87,9 @@ public class BallHandler : MonoBehaviour
 
     private void Shoot(Vector3 worldPoint)
     {
+        PlayerPrefs.SetFloat("posX", transform.position.x);
+        PlayerPrefs.SetFloat("posY", transform.position.y);
+        PlayerPrefs.SetFloat("posZ", transform.position.z);
         isAiming = false;
         lineRenderer.enabled = false;
 
@@ -138,6 +152,41 @@ public class BallHandler : MonoBehaviour
         {
             Debug.Log("Ура! Победа!");
             Destroy(gameObject, 1);
+        }
+    }
+
+    private void OnTriggerExit(Collider collider)
+    {
+        if (collider.gameObject.tag == "LevelBounds")
+        {
+            Debug.Log("А ну назад!");
+            Stop();
+            transform.position = new Vector3(
+                PlayerPrefs.GetFloat("posX"), 
+                PlayerPrefs.GetFloat("posY") + 1, 
+                PlayerPrefs.GetFloat("posZ") 
+                );
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Boombox")
+        {
+            Vector3 currentMovementDirection = rigidbody.velocity;
+            RaycastHit hit;
+            Ray ray = new Ray(transform.position, currentMovementDirection);
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                Vector3 reflectionDirection = Vector3.Reflect(currentMovementDirection, hit.normal);
+                rigidbody.AddForce(
+                    new Vector3(
+                        -reflectionDirection.x,
+                        0,
+                        reflectionDirection.z
+                    ) * reflectPower);
+            }
         }
     }
 }
