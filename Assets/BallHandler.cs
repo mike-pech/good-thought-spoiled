@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 
 public class BallHandler : MonoBehaviour
@@ -11,53 +13,69 @@ public class BallHandler : MonoBehaviour
     private bool isIdle;
     private bool isAiming;
 
-    private Rigidbody rigidbody;
+    private new Rigidbody rigidbody;
 
-    private void Awake() {
+    private void Awake()
+    {
         rigidbody = GetComponent<Rigidbody>();
 
         isAiming = false;
         lineRenderer.enabled = false;
+
     }
 
-    void FixedUpdate() {
-        if (rigidbody.velocity.magnitude < stopVelocity) {
+    void FixedUpdate()
+    {
+        if (gameObject.IsDestroyed() == true)
+        {
+            return;
+        }
+        if (rigidbody.velocity.magnitude < stopVelocity)
+        {
             Stop();
         }
         ProcessAim();
     }
 
-    private void Stop() {
+    public void Stop()
+    {
         rigidbody.velocity = Vector3.zero;
         rigidbody.angularVelocity = Vector3.zero;
         isIdle = true;
     }
 
-    private void OnMouseDown() {
-        if (isIdle) {
+    private void OnMouseDown()
+    {
+        if (isIdle)
+        {
             isAiming = true;
         }
     }
 
-    private void ProcessAim() {
-        if(!isAiming || !isIdle) {
+    private void ProcessAim()
+    {
+        if (!isAiming || !isIdle)
+        {
             return;
         }
 
         Vector3? worldPoint = CastMouseClickRay();
 
-        if (!worldPoint.HasValue) {
+        if (!worldPoint.HasValue)
+        {
             return;
         }
 
         DrawLine(worldPoint.Value);
 
-        if (Input.GetMouseButtonUp(0)) {
+        if (Input.GetMouseButtonUp(0))
+        {
             Shoot(worldPoint.Value);
         }
     }
 
-    private void Shoot(Vector3 worldPoint) {
+    private void Shoot(Vector3 worldPoint)
+    {
         isAiming = false;
         lineRenderer.enabled = false;
 
@@ -74,16 +92,18 @@ public class BallHandler : MonoBehaviour
         isIdle = false;
     }
 
-    private void DrawLine(Vector3 worldPoint) {
+    private void DrawLine(Vector3 worldPoint)
+    {
         Vector3[] positions = {
-            transform.position,
-            -worldPoint,
+            transform.position.normalized,
+            new Vector3(-worldPoint.x, 0, -worldPoint.z),
         };
         lineRenderer.SetPositions(positions);
         lineRenderer.enabled = true;
     }
 
-    private Vector3? CastMouseClickRay() {
+    private Vector3? CastMouseClickRay()
+    {
         Vector3 screenMousePosFar = new Vector3(
             Input.mousePosition.x,
             Input.mousePosition.y,
@@ -98,14 +118,26 @@ public class BallHandler : MonoBehaviour
         Vector3 worldMousePosNear = Camera.main.ScreenToWorldPoint(screenMousePosNear);
         RaycastHit hit;
         if (Physics.Raycast(
-                worldMousePosNear, 
-                worldMousePosFar - worldMousePosNear, 
-                out hit, 
+                worldMousePosNear,
+                worldMousePosFar - worldMousePosNear,
+                out hit,
                 float.PositiveInfinity
-                )) {
-                    return hit.point;
-        } else {
+                ))
+        {
+            return hit.point;
+        }
+        else
+        {
             return null;
+        }
+    }
+
+    private void OnTriggerEnter(Collider collider)
+    {
+        if (collider.gameObject.tag == "Finish")
+        {
+            Debug.Log("Ура! Победа!");
+            Destroy(gameObject, 1);
         }
     }
 }
