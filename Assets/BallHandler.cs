@@ -110,7 +110,7 @@ public class BallHandler : MonoBehaviour
     {
         Vector3[] positions = {
             transform.position.normalized,
-            new Vector3(-worldPoint.x, 0, -worldPoint.z),
+            Vector3.ProjectOnPlane(-worldPoint, Vector3.zero),
         };
         lineRenderer.SetPositions(positions);
         lineRenderer.enabled = true;
@@ -162,9 +162,9 @@ public class BallHandler : MonoBehaviour
             Debug.Log("А ну назад!");
             Stop();
             transform.position = new Vector3(
-                PlayerPrefs.GetFloat("posX"), 
-                PlayerPrefs.GetFloat("posY") + 1, 
-                PlayerPrefs.GetFloat("posZ") 
+                PlayerPrefs.GetFloat("posX"),
+                PlayerPrefs.GetFloat("posY") + 1,
+                PlayerPrefs.GetFloat("posZ")
                 );
         }
     }
@@ -173,20 +173,25 @@ public class BallHandler : MonoBehaviour
     {
         if (collision.gameObject.tag == "Boombox")
         {
-            Vector3 currentMovementDirection = rigidbody.velocity;
-            RaycastHit hit;
-            Ray ray = new Ray(transform.position, currentMovementDirection);
+            // Reflect(rigidbody.velocity);
+            rigidbody.velocity += new Vector3(10, 0, 10);
+        }
+    }
 
-            if (Physics.Raycast(ray, out hit))
-            {
-                Vector3 reflectionDirection = Vector3.Reflect(currentMovementDirection, hit.normal);
-                rigidbody.AddForce(
-                    new Vector3(
-                        -reflectionDirection.x,
-                        0,
-                        reflectionDirection.z
-                    ) * reflectPower);
-            }
+    private void Reflect(Vector3 currentMovementDirection)
+    {
+        RaycastHit hit;
+        Ray ray = new Ray(transform.position, currentMovementDirection);
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            Vector3 reflectionDirection = Vector3.Reflect(currentMovementDirection, hit.normal);
+            rigidbody.AddForce(
+                new Vector3(
+                    -reflectionDirection.x,
+                    0,
+                    reflectionDirection.z
+                ) * reflectPower);
         }
     }
 }
