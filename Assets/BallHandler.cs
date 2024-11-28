@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -15,6 +16,7 @@ public class BallHandler : MonoBehaviour
     private bool isAiming;
 
     private new Rigidbody rigidbody;
+    Vector3? worldPoint;
 
     private void Awake()
     {
@@ -52,11 +54,6 @@ public class BallHandler : MonoBehaviour
 
     private void OnMouseDown()
     {
-        // DEBUG ONLY — DELETE WHEN FINISHED!
-        if (!isAiming || !isIdle)
-        {
-            Stop();
-        }
         if (isIdle)
         {
             isAiming = true;
@@ -77,7 +74,7 @@ public class BallHandler : MonoBehaviour
             return;
         }
 
-        DrawLine(worldPoint.Value);
+        // DrawLine(worldPoint.Value);
 
         if (Input.GetMouseButtonUp(0))
         {
@@ -91,7 +88,7 @@ public class BallHandler : MonoBehaviour
         PlayerPrefs.SetFloat("posY", transform.position.y);
         PlayerPrefs.SetFloat("posZ", transform.position.z);
         isAiming = false;
-        lineRenderer.enabled = false;
+        // lineRenderer.enabled = false;
 
         Vector3 horizontalWorldPoint = new Vector3(
             worldPoint.x,
@@ -108,12 +105,21 @@ public class BallHandler : MonoBehaviour
 
     private void DrawLine(Vector3 worldPoint)
     {
-        Vector3[] positions = {
+        // Vector3[] positions = {
+        //     transform.position.normalized,
+        //     Vector3.ProjectOnPlane(-worldPoint, Vector3.zero),
+        // };
+        // lineRenderer.SetPositions(positions);
+        // lineRenderer.enabled = true;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(
             transform.position.normalized,
-            Vector3.ProjectOnPlane(-worldPoint, Vector3.zero),
-        };
-        lineRenderer.SetPositions(positions);
-        lineRenderer.enabled = true;
+            CastMouseClickRay().Value
+        );
     }
 
     private Vector3? CastMouseClickRay()
