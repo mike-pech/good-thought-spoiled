@@ -1,8 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Ball : MonoBehaviour
-{
+public class Ball : MonoBehaviour {
     [SerializeField] private LineRenderer lineRenderer;
     [SerializeField] private float stopVelocity = 0.05f;
     [SerializeField] private float shotPower = 150f;
@@ -13,8 +12,7 @@ public class Ball : MonoBehaviour
     private new Rigidbody rigidbody;
     Vector3? worldPoint;
 
-    private void Awake()
-    {
+    private void Awake() {
         rigidbody = GetComponent<Rigidbody>();
 
         isAiming = false;
@@ -22,21 +20,17 @@ public class Ball : MonoBehaviour
 
     }
 
-    void FixedUpdate()
-    {
-        if (gameObject.IsDestroyed() == true)
-        {
+    void FixedUpdate() {
+        if (gameObject.IsDestroyed() == true) {
             return;
         }
-        if (rigidbody.linearVelocity.magnitude < stopVelocity)
-        {
+        if (rigidbody.linearVelocity.magnitude < stopVelocity) {
             Stop();
         }
         ProcessAim();
     }
 
-    public void Stop()
-    {
+    public void Stop() {
         rigidbody.linearVelocity = new Vector3(
             0,
             0,
@@ -48,38 +42,31 @@ public class Ball : MonoBehaviour
         isIdle = true;
     }
 
-    private void OnMouseDown()
-    {
-        if (isIdle)
-        {
+    private void OnMouseDown() {
+        if (isIdle) {
             isAiming = true;
         }
     }
 
-    private void ProcessAim()
-    {
-        if (!isAiming || !isIdle)
-        {
+    private void ProcessAim() {
+        if (!isAiming || !isIdle) {
             return;
         }
 
         Vector3? worldPoint = CastMouseClickRay();
 
-        if (!worldPoint.HasValue)
-        {
+        if (!worldPoint.HasValue) {
             return;
         }
 
         DrawLine(worldPoint.Value);
 
-        if (Input.GetMouseButtonUp(0))
-        {
+        if (Input.GetMouseButtonUp(0)) {
             Shoot(worldPoint.Value);
         }
     }
 
-    private void Shoot(Vector3 worldPoint)
-    {
+    private void Shoot(Vector3 worldPoint) {
         PlayerPrefs.SetFloat("posX", transform.position.x);
         PlayerPrefs.SetFloat("posY", transform.position.y);
         PlayerPrefs.SetFloat("posZ", transform.position.z);
@@ -99,8 +86,7 @@ public class Ball : MonoBehaviour
         isIdle = false;
     }
 
-    private void DrawLine(Vector3 worldPoint)
-    {
+    private void DrawLine(Vector3 worldPoint) {
         Vector3[] positions = {
             transform.position.normalized,
             Vector3.ProjectOnPlane(-worldPoint, Vector3.zero),
@@ -118,8 +104,7 @@ public class Ball : MonoBehaviour
     //     );
     // }
 
-    private Vector3? CastMouseClickRay()
-    {
+    private Vector3? CastMouseClickRay() {
         Vector3 screenMousePosFar = new Vector3(
             Input.mousePosition.x,
             Input.mousePosition.y,
@@ -138,29 +123,22 @@ public class Ball : MonoBehaviour
                 worldMousePosFar - worldMousePosNear,
                 out hit,
                 float.PositiveInfinity
-                ))
-        {
+                )) {
             return hit.point;
-        }
-        else
-        {
+        } else {
             return null;
         }
     }
 
-    private void OnTriggerEnter(Collider collider)
-    {
-        if (collider.gameObject.tag == "Finish")
-        {
+    private void OnTriggerEnter(Collider collider) {
+        if (collider.gameObject.tag == "Finish") {
             Debug.Log("Ура! Победа!");
             Destroy(gameObject, 1);
         }
     }
 
-    private void OnTriggerExit(Collider collider)
-    {
-        if (collider.gameObject.tag == "LevelBounds")
-        {
+    private void OnTriggerExit(Collider collider) {
+        if (collider.gameObject.tag == "LevelBounds") {
             Debug.Log("А ну назад!");
             Stop();
             transform.position = new Vector3(
@@ -171,22 +149,18 @@ public class Ball : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.tag == "Boombox")
-        {
+    private void OnCollisionEnter(Collision collision) {
+        if (collision.gameObject.tag == "Boombox") {
             // Reflect(rigidbody.velocity);
             rigidbody.linearVelocity += new Vector3(10, 0, 10);
         }
     }
 
-    private void Reflect(Vector3 currentMovementDirection)
-    {
+    private void Reflect(Vector3 currentMovementDirection) {
         RaycastHit hit;
         Ray ray = new Ray(transform.position, currentMovementDirection);
 
-        if (Physics.Raycast(ray, out hit))
-        {
+        if (Physics.Raycast(ray, out hit)) {
             Vector3 reflectionDirection = Vector3.Reflect(currentMovementDirection, hit.normal);
             rigidbody.AddForce(
                 new Vector3(
