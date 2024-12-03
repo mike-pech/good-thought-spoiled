@@ -5,6 +5,7 @@ public class CameraMain : MonoBehaviour {
 
     [SerializeField] private Transform player;
     [SerializeField] private Transform finish;
+    // [SerializeFiled] private sensitivity = 10f;
     [SerializeField] private Vector3 positionOffset = new Vector3(9f, 10f, -5f);
     [SerializeField] private Vector3 rotationOffset = new Vector3(45f, 300f, 0f);
 

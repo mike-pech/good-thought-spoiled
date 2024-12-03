@@ -5,7 +5,8 @@ public class Ball : MonoBehaviour {
     [SerializeField] private LineRenderer lineRenderer;
     [SerializeField] private float stopVelocity = 0.05f;
     [SerializeField] private float shotPower = 150f;
-    [SerializeField] private float reflectPower = 150f;
+    [SerializeField] private GameObject ballPrefab;
+    [SerializeField] private float MaxForce;
     private bool isIdle;
     private bool isAiming;
 
@@ -33,8 +34,7 @@ public class Ball : MonoBehaviour {
     public void Stop() {
         rigidbody.linearVelocity = new Vector3(
             0,
-            0,
-            // rigidbody.linearVelocity.y,       // So it won't hang on vertical surfaces
+            rigidbody.linearVelocity.y,       // So it won't hang on vertical surfaces
             0
             );
         rigidbody.angularVelocity = Vector3.zero;
@@ -53,87 +53,99 @@ public class Ball : MonoBehaviour {
             return;
         }
 
+        // TODO: Still works like shit for no reason!
         Vector3? worldPoint = CastMouseClickRay();
 
         if (!worldPoint.HasValue) {
             return;
         }
 
-        DrawLine(worldPoint.Value);
+        // DrawLine(worldPoint.Value);
+
+        Predict(worldPoint.Value);
 
         if (Input.GetMouseButtonUp(0)) {
             Shoot(worldPoint.Value);
         }
     }
 
-    private void Shoot(Vector3 worldPoint) {
-        PlayerPrefs.SetFloat("posX", transform.position.x);
-        PlayerPrefs.SetFloat("posY", transform.position.y);
-        PlayerPrefs.SetFloat("posZ", transform.position.z);
-        isAiming = false;
-        lineRenderer.enabled = false;
-
-        Vector3 horizontalWorldPoint = new Vector3(
-            worldPoint.x,
-            transform.position.y,
-            worldPoint.z
-        );
-
-        Vector3 direction = (horizontalWorldPoint - transform.position).normalized;
-        float strength = Vector3.Distance(transform.position, horizontalWorldPoint);
-
-        rigidbody.AddForce(-direction * strength * shotPower);
-        isIdle = false;
-    }
-
-    private void DrawLine(Vector3 worldPoint) {
-        Vector3[] positions = {
-            transform.position.normalized,
-            Vector3.ProjectOnPlane(-worldPoint, Vector3.zero),
-        };
-        lineRenderer.SetPositions(positions);
+    void Predict(Vector3 worldPointValue) {
+        Vector3? force = Shoot(worldPointValue, dryRun: true);
+        if (!force.HasValue) {
+            return;
+        }
+        PredictionManager.instance.Predict(ballPrefab, transform.position, force.Value);
         lineRenderer.enabled = true;
     }
 
-    // private void OnDrawGizmos()
-    // {
-    //     Gizmos.color = Color.cyan;
-    //     Gizmos.DrawLine(
+    public Vector3? Shoot(Vector3 worldPointValue, bool dryRun = false) {
+        Vector3 horizontalWorldPoint = new Vector3(
+            worldPointValue.x,
+            transform.position.y,
+            worldPointValue.z
+        );
+
+        Vector3 direction = (horizontalWorldPoint - transform.position).normalized;
+        float force = Mathf.Clamp(Vector3.Distance(transform.position, horizontalWorldPoint) * shotPower, 0, MaxForce);
+
+        if (!dryRun) {      // Acturally shoot!
+            PlayerPrefs.SetFloat("posX", transform.position.x);
+            PlayerPrefs.SetFloat("posY", transform.position.y);
+            PlayerPrefs.SetFloat("posZ", transform.position.z);
+            isAiming = false;
+            lineRenderer.enabled = false;
+
+            rigidbody.AddForce(-direction * force);
+            isIdle = false;
+            return null;
+        }
+        return -direction * force;
+    }
+
+    // private void DrawLine(Vector3 worldPoint) {
+    //     Vector3[] positions = {
     //         transform.position.normalized,
-    //         CastMouseClickRay().Value
-    //     );
+    //         Vector3.ProjectOnPlane(-worldPoint, Vector3.zero),
+    //     };
+    //     lineRenderer.SetPositions(positions);
+    //     lineRenderer.enabled = true;
     // }
 
     private Vector3? CastMouseClickRay() {
-        Vector3 screenMousePosFar = new Vector3(
-            Input.mousePosition.x,
-            Input.mousePosition.y,
-            Camera.main.farClipPlane
-        );
-        Vector3 screenMousePosNear = new Vector3(
-            Input.mousePosition.x,
-            Input.mousePosition.y,
-            Camera.main.nearClipPlane
-        );
-        Vector3 worldMousePosFar = Camera.main.ScreenToWorldPoint(screenMousePosFar);
-        Vector3 worldMousePosNear = Camera.main.ScreenToWorldPoint(screenMousePosNear);
+        // Vector3 screenMousePosFar = new Vector3(
+        //     Input.mousePosition.x,
+        //     Input.mousePosition.y,
+        //     Camera.main.farClipPlane
+        // );
+        // Vector3 screenMousePosNear = new Vector3(
+        //     Input.mousePosition.x,
+        //     Input.mousePosition.y,
+        //     Camera.main.nearClipPlane
+        // );
+        // Vector3 worldMousePosFar = Camera.main.ScreenToWorldPoint(screenMousePosFar);
+        // Vector3 worldMousePosNear = Camera.main.ScreenToWorldPoint(screenMousePosNear);
+        // RaycastHit hit;
+        // if (Physics.Raycast(
+        //         worldMousePosNear,
+        //         worldMousePosFar - worldMousePosNear,
+        //         out hit,
+        //         float.PositiveInfinity
+        //         )) {
+        //     return hit.point;
+
+        // Vector3 screenPoint = Camera.main.WorldToScreenPoint(Input.mousePosition);
+        // Ray ray = Camera.main.ScreenPointToRay(screenPoint);
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if (Physics.Raycast(
-                worldMousePosNear,
-                worldMousePosFar - worldMousePosNear,
+                ray,
                 out hit,
                 float.PositiveInfinity
                 )) {
             return hit.point;
         } else {
             return null;
-        }
-    }
-
-    private void OnTriggerEnter(Collider collider) {
-        if (collider.gameObject.tag == "Finish") {
-            Debug.Log("Ура! Победа!");
-            Destroy(gameObject, 1);
         }
     }
 
@@ -146,28 +158,6 @@ public class Ball : MonoBehaviour {
                 PlayerPrefs.GetFloat("posY") + 1,
                 PlayerPrefs.GetFloat("posZ")
                 );
-        }
-    }
-
-    private void OnCollisionEnter(Collision collision) {
-        if (collision.gameObject.tag == "Boombox") {
-            // Reflect(rigidbody.velocity);
-            rigidbody.linearVelocity += new Vector3(10, 0, 10);
-        }
-    }
-
-    private void Reflect(Vector3 currentMovementDirection) {
-        RaycastHit hit;
-        Ray ray = new Ray(transform.position, currentMovementDirection);
-
-        if (Physics.Raycast(ray, out hit)) {
-            Vector3 reflectionDirection = Vector3.Reflect(currentMovementDirection, hit.normal);
-            rigidbody.AddForce(
-                new Vector3(
-                    -reflectionDirection.x,
-                    0,
-                    reflectionDirection.z
-                ) * reflectPower);
         }
     }
 }
