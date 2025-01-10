@@ -295,8 +295,8 @@ MonoBehaviour:
   lineRenderer: {fileID: 106656878678757943}
   stopVelocity: 0.25
   shotPower: 2000
-  firePoint: {fileID: 2730013060009170343}
   ballPrefab: {fileID: 2730013060009170343}
+  MaxForce: 0
 --- !u!54 &3335132568912421663
 Rigidbody:
   m_ObjectHideFlags: 0

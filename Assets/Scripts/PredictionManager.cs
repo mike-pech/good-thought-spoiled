@@ -66,10 +66,11 @@ public class PredictionManager : Singleton<PredictionManager> {
                 dummy = Instantiate(subject);
                 SceneManager.MoveGameObjectToScene(dummy, predictionScene);
             }
+            Debug.DrawLine(currentPosition, dummy.transform.position, Color.cyan);
 
             dummy.transform.position = currentPosition;
             dummy.GetComponent<Rigidbody>().AddForce(force, ForceMode.Impulse);
-            lineRenderer.positionCount = 0;
+            // lineRenderer.positionCount = 0;
             lineRenderer.positionCount = maxIterations;
 
 

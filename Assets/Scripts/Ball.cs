@@ -19,6 +19,7 @@ public class Ball : MonoBehaviour {
         isAiming = false;
         lineRenderer.enabled = false;
 
+        // PredictionManager.instance.CopyAllObstacles();
     }
 
     void FixedUpdate() {
@@ -75,6 +76,7 @@ public class Ball : MonoBehaviour {
             return;
         }
         PredictionManager.instance.Predict(ballPrefab, transform.position, force.Value);
+        Debug.DrawLine(transform.position, force.Value, Color.cyan);
         lineRenderer.enabled = true;
     }
 
@@ -84,6 +86,8 @@ public class Ball : MonoBehaviour {
             transform.position.y,
             worldPointValue.z
         );
+
+        Debug.DrawLine(transform.position, worldPointValue, Color.red);
 
         Vector3 direction = (horizontalWorldPoint - transform.position).normalized;
         float force = Mathf.Clamp(Vector3.Distance(transform.position, horizontalWorldPoint) * shotPower, 0, MaxForce);
@@ -141,11 +145,11 @@ public class Ball : MonoBehaviour {
         if (Physics.Raycast(
                 ray,
                 out hit,
-                float.PositiveInfinity
+                1000f
                 )) {
             return hit.point;
         } else {
-            return null;
+            return ray.GetPoint(1000f);
         }
     }
 
