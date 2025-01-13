@@ -11,11 +11,13 @@ public class Line : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.tag == "FallThrough") {
+            Debug.Log("Collide!");
             collider.enabled = false;
         }
     }
     private void OnCollisionExit(Collision collision) {
         if (collision.gameObject.tag == "FallThrough") {
+            Debug.Log("Uncollide!");
             collider.enabled = true;
         }
     }
