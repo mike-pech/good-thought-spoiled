@@ -7,13 +7,15 @@ public class BigIron : MonoBehaviour, IPowerable {
     [SerializeField] private GameObject obstacleGroup;
 
     private new Rigidbody rigidbody;
-
-    private void Awake() {
+    private new AudioSource audio;
+    void Awake() {
+        audio = GetComponent<AudioSource>();
         rigidbody = GetComponent<Rigidbody>();
         rigidbody.useGravity = false;
-                HoleMade = false;
+        HoleMade = false;
     }
     public void SetPowered() {
+        audio.Play();
         IsPowered = true;
     }
 

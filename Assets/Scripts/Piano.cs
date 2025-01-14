@@ -2,8 +2,13 @@ using UnityEngine;
 
 public class Piano : MonoBehaviour, IPowerable {
     [SerializeField] private bool IsPowered;
+    private new AudioSource audio;
 
+    private void Awake() {
+        audio = GetComponent<AudioSource>();
+    }
     public void SetPowered() {
+        audio.Play();
         IsPowered = true;
     }
 
