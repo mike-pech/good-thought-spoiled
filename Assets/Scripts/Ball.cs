@@ -11,6 +11,7 @@ public class Ball : MonoBehaviour {
     private bool isAiming;
 
     private new Rigidbody rigidbody;
+    private new AudioSource audio;
     Vector3? worldPoint;
 
     private void Awake() {
@@ -19,6 +20,7 @@ public class Ball : MonoBehaviour {
         isAiming = false;
         lineRenderer.enabled = false;
 
+        audio = GetComponent<AudioSource>();
         // PredictionManager.instance.CopyAllObstacles();
     }
 
@@ -67,6 +69,7 @@ public class Ball : MonoBehaviour {
 
         if (Input.GetMouseButtonUp(0)) {
             Shoot(worldPoint.Value);
+            audio.Play();
         }
     }
 

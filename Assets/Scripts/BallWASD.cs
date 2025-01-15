@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public class BallWASD : MonoBehaviour {
-    const float FORCE = 80;
+    const float FORCE = 800;
     // float speed = 20;
     float horizontalInput, verticalInput = 0;
     Rigidbody rb;
@@ -22,6 +22,6 @@ public class BallWASD : MonoBehaviour {
 
     void FixedUpdate() {
         Vector3 hit = new Vector3(horizontalInput, 0, verticalInput);
-        rb.AddForce(hit * FORCE);
+        rb.AddForce(hit * -FORCE);
     }
 }
