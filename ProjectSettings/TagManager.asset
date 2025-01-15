@@ -7,6 +7,8 @@ TagManager:
   - LevelBounds
   - Bouncer
   - FallThrough
+  - CameraAngle
+  - PowerBox
   layers:
   - Default
   - TransparentFX
