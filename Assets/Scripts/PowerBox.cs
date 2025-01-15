@@ -63,10 +63,12 @@ public class PowerBox : MonoBehaviour, IPowerBox {
                         SetMaterial(default);
                         var selectedIPowerBox = selectedPowerBox.GetComponent<IPowerBox>();
                         selectedIPowerBox.SetBatteryPlaced();
-                        var mainCameraObject = mainCamera.GetComponent<ICamera>();
-                        if (mainCameraObject != null) {
-                            mainCameraObject.ChangeAngle(player, finish);
-                        }
+                        GameManager.instance.NextTurn();
+                        GameManager.instance.NextTurn();
+                        // var mainCameraObject = mainCamera.GetComponent<ICamera>();
+                        // if (mainCameraObject != null) {
+                        //     mainCameraObject.ChangeAngle(player, finish);
+                        // }
                     }
                 }
             }
@@ -80,6 +82,8 @@ public class PowerBox : MonoBehaviour, IPowerBox {
                 Debug.LogError("The poweredObject does not have the required component.");
             }
 
+            GameManager.instance.HaltResume();
+            GameManager.instance.NextTurn();
             BatteryPlaced = false;
         }
     }

@@ -14,10 +14,6 @@ public class CameraMain : MonoBehaviour, ICamera {
     private Transform currentAngle, currentFallbackAngle;
     private Vector3 mouseRotation;
 
-    private void Awake() {
-        ChangeAngle(player, finish);
-    }
-
     public void ChangeAngle(Transform angle, Transform fallbackAngle) {
         currentAngle = angle;
         currentFallbackAngle = fallbackAngle;

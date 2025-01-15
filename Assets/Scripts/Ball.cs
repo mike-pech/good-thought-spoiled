@@ -7,17 +7,24 @@ public class Ball : MonoBehaviour {
     [SerializeField] private float shotPower = 150f;
     [SerializeField] private GameObject ballPrefab;
     [SerializeField] private float MaxForce;
+    private bool wasShot;
     private bool isIdle;
     private bool isAiming;
 
     private new Rigidbody rigidbody;
     private new AudioSource audio;
     Vector3? worldPoint;
+    public string Name;
+
+    public Ball(string Name) {
+        this.Name = Name;
+    }
 
     private void Awake() {
         rigidbody = GetComponent<Rigidbody>();
 
         isAiming = false;
+        wasShot = false;
         // lineRenderer.enabled = false;
 
         audio = GetComponent<AudioSource>();
@@ -41,12 +48,16 @@ public class Ball : MonoBehaviour {
             0
             );
         rigidbody.angularVelocity = Vector3.zero;
-        transform.rotation = new Quaternion(0, 0, 0, 0);
+        transform.rotation = Quaternion.identity; // Сброс вращения
         isIdle = true;
+        if (wasShot) {
+            GameManager.instance.NextTurn(); // Переход к следующему игроку
+            wasShot = false;
+        }
     }
 
     private void OnMouseDown() {
-        if (isIdle) {
+        if (isIdle && GameManager.instance.IsCurrentPlayer(this)) { // Проверка, текущий ли игрок
             isAiming = true;
         }
     }
@@ -104,6 +115,7 @@ public class Ball : MonoBehaviour {
 
             rigidbody.AddForce(-direction * force);
             isIdle = false;
+            wasShot = true;
             return null;
         }
         return -direction * force;
