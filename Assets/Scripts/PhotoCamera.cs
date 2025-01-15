@@ -26,13 +26,14 @@ public class PhotoCamera : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.tag == "Player") {
-            audio.Play();
             // anim.Play("Cube.007|Cube.007|Scene");
             // Only one player can hit a camera during the playthrough!
             if (!cameraHit) {
+                audio.Play();
+                GameManager.instance.HaltResume();
                 var mainCameraObject = mainCamera.GetComponent<ICamera>();
                 if (mainCameraObject != null) {
-                    mainCameraObject.ChangeAngle(cameraOverview, player);
+                    mainCameraObject.ChangeAngle(cameraOverview, collision.gameObject.transform);
                 }
                 powerBoxes = GameObject.FindGameObjectsWithTag("PowerBox");
                 foreach (GameObject powerBox in powerBoxes) {

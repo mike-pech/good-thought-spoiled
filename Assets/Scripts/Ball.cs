@@ -2,23 +2,30 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 public class Ball : MonoBehaviour {
-    [SerializeField] private LineRenderer lineRenderer;
+    // [SerializeField] private LineRenderer lineRenderer;
     [SerializeField] private float stopVelocity = 0.05f;
     [SerializeField] private float shotPower = 150f;
     [SerializeField] private GameObject ballPrefab;
     [SerializeField] private float MaxForce;
+    private bool wasShot;
     private bool isIdle;
     private bool isAiming;
 
     private new Rigidbody rigidbody;
     private new AudioSource audio;
     Vector3? worldPoint;
+    public string Name;
+
+    public Ball(string Name) {
+        this.Name = Name;
+    }
 
     private void Awake() {
         rigidbody = GetComponent<Rigidbody>();
 
         isAiming = false;
-        lineRenderer.enabled = false;
+        wasShot = false;
+        // lineRenderer.enabled = false;
 
         audio = GetComponent<AudioSource>();
         // PredictionManager.instance.CopyAllObstacles();
@@ -41,12 +48,16 @@ public class Ball : MonoBehaviour {
             0
             );
         rigidbody.angularVelocity = Vector3.zero;
-        transform.rotation = new Quaternion(0, 0, 0, 0);
+        transform.rotation = Quaternion.identity; // Сброс вращения
         isIdle = true;
+        if (wasShot) {
+            GameManager.instance.NextTurn(); // Переход к следующему игроку
+            wasShot = false;
+        }
     }
 
     private void OnMouseDown() {
-        if (isIdle) {
+        if (isIdle && GameManager.instance.IsCurrentPlayer(this)) { // Проверка, текущий ли игрок
             isAiming = true;
         }
     }
@@ -65,7 +76,7 @@ public class Ball : MonoBehaviour {
 
         // DrawLine(worldPoint.Value);
 
-        Predict(worldPoint.Value);
+        // Predict(worldPoint.Value);
 
         if (Input.GetMouseButtonUp(0)) {
             Shoot(worldPoint.Value);
@@ -80,7 +91,7 @@ public class Ball : MonoBehaviour {
         }
         PredictionManager.instance.Predict(ballPrefab, transform.position, force.Value);
         Debug.DrawLine(transform.position, force.Value, Color.cyan);
-        lineRenderer.enabled = true;
+        // lineRenderer.enabled = true;
     }
 
     public Vector3? Shoot(Vector3 worldPointValue, bool dryRun = false) {
@@ -100,10 +111,11 @@ public class Ball : MonoBehaviour {
             PlayerPrefs.SetFloat("posY", transform.position.y);
             PlayerPrefs.SetFloat("posZ", transform.position.z);
             isAiming = false;
-            lineRenderer.enabled = false;
+            // lineRenderer.enabled = false;
 
             rigidbody.AddForce(-direction * force);
             isIdle = false;
+            wasShot = true;
             return null;
         }
         return -direction * force;
