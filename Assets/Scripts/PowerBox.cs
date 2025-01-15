@@ -23,6 +23,9 @@ public class PowerBox : MonoBehaviour, IPowerBox {
     public void SetDimmed() {
         IsLitUp = false;
     }
+    public void SetBatteryPlaced() {
+        BatteryPlaced = true;
+    }
     public void SetMaterial(Material material) {
         var meshRenderer = GetComponent<MeshRenderer>();
         meshRenderer.material = material;
@@ -49,15 +52,17 @@ public class PowerBox : MonoBehaviour, IPowerBox {
                 if (Physics.Raycast(ray, out RaycastHit hit)) {
                     Debug.DrawRay(ray.origin, ray.direction, Color.red);
                     if (hit.collider.gameObject.tag == "PowerBox") {
+                        var selectedPowerBox = hit.collider.gameObject.GetComponent<Transform>();
                         Instantiate(
                             batteryPrefab,
-                            transform.position + new Vector3(0, 2f, 0),
+                            selectedPowerBox.position + new Vector3(0, 2f, 0),
                             new Quaternion(-90f, 0f, 0f, 0f),
                             parent: obstacleGroup.transform
                             );
                         DimAll();
                         SetMaterial(default);
-                        BatteryPlaced = true;
+                        var selectedIPowerBox = selectedPowerBox.GetComponent<IPowerBox>();
+                        selectedIPowerBox.SetBatteryPlaced();
                         var mainCameraObject = mainCamera.GetComponent<ICamera>();
                         if (mainCameraObject != null) {
                             mainCameraObject.ChangeAngle(player, finish);

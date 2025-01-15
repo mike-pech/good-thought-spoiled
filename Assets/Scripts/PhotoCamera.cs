@@ -7,6 +7,7 @@ public interface ICamera {
 public interface IPowerBox {
     public void SetLitUp(Material highlight);
     public void SetDimmed();
+    public void SetBatteryPlaced();
 }
 
 public class PhotoCamera : MonoBehaviour {
