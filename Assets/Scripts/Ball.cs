@@ -2,7 +2,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 public class Ball : MonoBehaviour {
-    [SerializeField] private LineRenderer lineRenderer;
+    // [SerializeField] private LineRenderer lineRenderer;
     [SerializeField] private float stopVelocity = 0.05f;
     [SerializeField] private float shotPower = 150f;
     [SerializeField] private GameObject ballPrefab;
@@ -18,7 +18,7 @@ public class Ball : MonoBehaviour {
         rigidbody = GetComponent<Rigidbody>();
 
         isAiming = false;
-        lineRenderer.enabled = false;
+        // lineRenderer.enabled = false;
 
         audio = GetComponent<AudioSource>();
         // PredictionManager.instance.CopyAllObstacles();
@@ -65,7 +65,7 @@ public class Ball : MonoBehaviour {
 
         // DrawLine(worldPoint.Value);
 
-        Predict(worldPoint.Value);
+        // Predict(worldPoint.Value);
 
         if (Input.GetMouseButtonUp(0)) {
             Shoot(worldPoint.Value);
@@ -80,7 +80,7 @@ public class Ball : MonoBehaviour {
         }
         PredictionManager.instance.Predict(ballPrefab, transform.position, force.Value);
         Debug.DrawLine(transform.position, force.Value, Color.cyan);
-        lineRenderer.enabled = true;
+        // lineRenderer.enabled = true;
     }
 
     public Vector3? Shoot(Vector3 worldPointValue, bool dryRun = false) {
@@ -100,7 +100,7 @@ public class Ball : MonoBehaviour {
             PlayerPrefs.SetFloat("posY", transform.position.y);
             PlayerPrefs.SetFloat("posZ", transform.position.z);
             isAiming = false;
-            lineRenderer.enabled = false;
+            // lineRenderer.enabled = false;
 
             rigidbody.AddForce(-direction * force);
             isIdle = false;
